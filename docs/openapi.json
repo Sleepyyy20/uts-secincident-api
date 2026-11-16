@@ -1,0 +1,1039 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "SecIncident API",
+    "version": "1.0.0",
+    "description": "REST API pelaporan insiden & pelacakan kerentanan aset (UTS Pemrograman Web Lanjut). Respons sukses: {data, meta?}; error: {error:{code,message,details?}}."
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:5000"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key"
+      }
+    }
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": [
+          "System"
+        ],
+        "summary": "Cek status layanan",
+        "responses": {
+          "200": {
+            "description": "Berhasil"
+          }
+        }
+      }
+    },
+    "/api/users": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Buat user",
+        "responses": {
+          "201": {
+            "description": "Berhasil"
+          },
+          "401": {
+            "description": "X-API-Key tidak valid"
+          },
+          "422": {
+            "description": "Validasi gagal"
+          },
+          "409": {
+            "description": "Konflik/duplikat"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "username": "analyst1",
+                "email": "analyst1@example.test",
+                "password": "Password123!",
+                "role": "analyst"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Daftar user (filter role, q; sort; pagination)",
+        "responses": {
+          "200": {
+            "description": "Berhasil"
+          }
+        },
+        "parameters": [
+          {
+            "name": "role",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/users/{id}": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Detail user",
+        "responses": {
+          "200": {
+            "description": "Berhasil"
+          },
+          "404": {
+            "description": "Tidak ditemukan"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Ubah sebagian data user",
+        "responses": {
+          "200": {
+            "description": "Berhasil"
+          },
+          "401": {
+            "description": "X-API-Key tidak valid"
+          },
+          "422": {
+            "description": "Validasi gagal"
+          },
+          "404": {
+            "description": "Tidak ditemukan"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "role": "admin"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Hapus user (409 jika masih direferensikan)",
+        "responses": {
+          "204": {
+            "description": "Berhasil"
+          },
+          "401": {
+            "description": "X-API-Key tidak valid"
+          },
+          "404": {
+            "description": "Tidak ditemukan"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/assets": {
+      "post": {
+        "tags": [
+          "Assets"
+        ],
+        "summary": "Buat aset",
+        "responses": {
+          "201": {
+            "description": "Berhasil"
+          },
+          "401": {
+            "description": "X-API-Key tidak valid"
+          },
+          "422": {
+            "description": "Validasi gagal"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "name": "web-server-01",
+                "asset_type": "server",
+                "ip_address": "192.0.2.10",
+                "criticality": "critical",
+                "owner_id": 1
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "Assets"
+        ],
+        "summary": "Daftar aset (filter asset_type, criticality, status, owner_id, q)",
+        "responses": {
+          "200": {
+            "description": "Berhasil"
+          }
+        },
+        "parameters": [
+          {
+            "name": "asset_type",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "criticality",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "owner_id",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/assets/{id}": {
+      "get": {
+        "tags": [
+          "Assets"
+        ],
+        "summary": "Detail aset",
+        "responses": {
+          "200": {
+            "description": "Berhasil"
+          },
+          "404": {
+            "description": "Tidak ditemukan"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Assets"
+        ],
+        "summary": "Ubah sebagian data aset",
+        "responses": {
+          "200": {
+            "description": "Berhasil"
+          },
+          "401": {
+            "description": "X-API-Key tidak valid"
+          },
+          "422": {
+            "description": "Validasi gagal"
+          },
+          "404": {
+            "description": "Tidak ditemukan"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "criticality": "high"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Assets"
+        ],
+        "summary": "Hapus aset",
+        "responses": {
+          "204": {
+            "description": "Berhasil"
+          },
+          "401": {
+            "description": "X-API-Key tidak valid"
+          },
+          "404": {
+            "description": "Tidak ditemukan"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/incidents": {
+      "post": {
+        "tags": [
+          "Incidents"
+        ],
+        "summary": "Laporkan insiden",
+        "responses": {
+          "201": {
+            "description": "Berhasil"
+          },
+          "401": {
+            "description": "X-API-Key tidak valid"
+          },
+          "422": {
+            "description": "Validasi gagal"
+          },
+          "409": {
+            "description": "Konflik/duplikat"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "title": "Percobaan brute force SSH",
+                "description": "Ratusan login gagal",
+                "incident_type": "unauthorized_access",
+                "severity": "high",
+                "reporter_id": 3,
+                "assignee_id": 2
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "Incidents"
+        ],
+        "summary": "Daftar insiden (filter status, severity, incident_type, assignee_id, q)",
+        "responses": {
+          "200": {
+            "description": "Berhasil"
+          }
+        },
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "severity",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "incident_type",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "assignee_id",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/incidents/stats": {
+      "get": {
+        "tags": [
+          "Incidents"
+        ],
+        "summary": "Ringkasan jumlah insiden per status & severity",
+        "responses": {
+          "200": {
+            "description": "Berhasil"
+          }
+        }
+      }
+    },
+    "/api/incidents/{id}": {
+      "get": {
+        "tags": [
+          "Incidents"
+        ],
+        "summary": "Detail insiden + aset terdampak",
+        "responses": {
+          "200": {
+            "description": "Berhasil"
+          },
+          "404": {
+            "description": "Tidak ditemukan"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Incidents"
+        ],
+        "summary": "Ubah insiden / status (state machine)",
+        "responses": {
+          "200": {
+            "description": "Berhasil"
+          },
+          "401": {
+            "description": "X-API-Key tidak valid"
+          },
+          "422": {
+            "description": "Validasi gagal"
+          },
+          "404": {
+            "description": "Tidak ditemukan"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "status": "investigating"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Incidents"
+        ],
+        "summary": "Hapus insiden",
+        "responses": {
+          "204": {
+            "description": "Berhasil"
+          },
+          "401": {
+            "description": "X-API-Key tidak valid"
+          },
+          "404": {
+            "description": "Tidak ditemukan"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/incidents/{id}/assets": {
+      "post": {
+        "tags": [
+          "Incidents"
+        ],
+        "summary": "Hubungkan aset terdampak",
+        "responses": {
+          "201": {
+            "description": "Berhasil"
+          },
+          "401": {
+            "description": "X-API-Key tidak valid"
+          },
+          "422": {
+            "description": "Validasi gagal"
+          },
+          "404": {
+            "description": "Tidak ditemukan"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "asset_id": 1,
+                "impact_note": "Target serangan"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/incidents/{id}/assets/{asset_id}": {
+      "delete": {
+        "tags": [
+          "Incidents"
+        ],
+        "summary": "Lepas hubungan aset",
+        "responses": {
+          "204": {
+            "description": "Berhasil"
+          },
+          "401": {
+            "description": "X-API-Key tidak valid"
+          },
+          "404": {
+            "description": "Tidak ditemukan"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "asset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/vulnerabilities": {
+      "post": {
+        "tags": [
+          "Vulnerabilities"
+        ],
+        "summary": "Catat kerentanan (severity dihitung dari CVSS)",
+        "responses": {
+          "201": {
+            "description": "Berhasil"
+          },
+          "401": {
+            "description": "X-API-Key tidak valid"
+          },
+          "422": {
+            "description": "Validasi gagal"
+          },
+          "409": {
+            "description": "Konflik/duplikat"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "asset_id": 1,
+                "title": "OpenSSH versi lama",
+                "cve_id": "CVE-2024-6387",
+                "cvss_score": 8.1
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "Vulnerabilities"
+        ],
+        "summary": "Daftar kerentanan (filter asset_id, severity, status, min_cvss, q)",
+        "responses": {
+          "200": {
+            "description": "Berhasil"
+          }
+        },
+        "parameters": [
+          {
+            "name": "asset_id",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "severity",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "min_cvss",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/vulnerabilities/{id}": {
+      "get": {
+        "tags": [
+          "Vulnerabilities"
+        ],
+        "summary": "Detail kerentanan",
+        "responses": {
+          "200": {
+            "description": "Berhasil"
+          },
+          "404": {
+            "description": "Tidak ditemukan"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Vulnerabilities"
+        ],
+        "summary": "Ubah kerentanan",
+        "responses": {
+          "200": {
+            "description": "Berhasil"
+          },
+          "401": {
+            "description": "X-API-Key tidak valid"
+          },
+          "422": {
+            "description": "Validasi gagal"
+          },
+          "404": {
+            "description": "Tidak ditemukan"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "status": "patched"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Vulnerabilities"
+        ],
+        "summary": "Hapus kerentanan",
+        "responses": {
+          "204": {
+            "description": "Berhasil"
+          },
+          "401": {
+            "description": "X-API-Key tidak valid"
+          },
+          "404": {
+            "description": "Tidak ditemukan"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/audit-logs": {
+      "get": {
+        "tags": [
+          "Audit"
+        ],
+        "summary": "Daftar audit log (read-only; butuh API key)",
+        "responses": {
+          "200": {
+            "description": "Berhasil"
+          },
+          "401": {
+            "description": "X-API-Key tidak valid"
+          }
+        },
+        "parameters": [
+          {
+            "name": "entity_type",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entity_id",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "user_id",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "action",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    }
+  }
+}
